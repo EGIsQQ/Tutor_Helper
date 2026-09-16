@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>Редактирование отчёта</title>
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', path='style.css') }}"
+>
+```
+
+</head>
+
+<body>
+
+<div class="container form-page">
+
+```
+<a
+    href="/lesson-reports/report_detail/{{ report.id }}"
+    class="back-link"
+>
+    ← Назад к отчёту
+</a>
+
+<div class="form-card">
+
+    <p class="eyebrow">Дневник репетитора</p>
+
+    <h1>Редактирование отчёта</h1>
+
+    <p class="subtitle">
+        Измените информацию об уроке и сохраните изменения.
+    </p>
+
+    <form id="edit-report-form" class="report-form">
+
+        <label>
+            Тема урока
+            <input
+                type="text"
+                id="topic"
+                value="{{ report.topic }}"
+                required
+            >
+        </label>
+
+        <label>
+            Дата и время урока
+            <input
+                type="datetime-local"
+                id="lesson_date"
+                value="{{ report.lesson_date.strftime('%Y-%m-%dT%H:%M') if report.lesson_date else '' }}"
+            >
+        </label>
+
+        <label>
+            Прогресс
+            <textarea id="progress">{{ report.progress or '' }}</textarea>
+        </label>
+
+        <label>
+            Сложности
+            <textarea id="difficulties">{{ report.difficulties or '' }}</textarea>
+        </label>
+
+        <label>
+            Домашнее задание
+            <textarea id="homework">{{ report.homework or '' }}</textarea>
+        </label>
+
+        <label>
+            План следующего урока
+            <textarea id="next_lesson_plan">{{ report.next_lesson_plan or '' }}</textarea>
+        </label>
+
+        <label>
+            Комментарий
+            <textarea id="comment">{{ report.comment or '' }}</textarea>
+        </label>
+
+        <div class="form-actions">
+
+            <a
+                href="/lesson-reports/report_detail/{{ report.id }}"
+                class="button button-secondary"
+            >
+                Отмена
+            </a>
+
+            <button
+                type="submit"
+                class="button"
+            >
+                Сохранить изменения
+            </button>
+
+        </div>
+
+        <p id="message"></p>
+
+    </form>
+
+</div>
+```
+
+</div>
+
+<script>
+
+    const form = document.getElementById("edit-report-form");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+        const data = {
+
+            topic:
+                document.getElementById("topic").value,
+
+            lesson_date:
+                document.getElementById("lesson_date").value || null,
+
+            progress:
+                document.getElementById("progress").value || null,
+
+            difficulties:
+                document.getElementById("difficulties").value || null,
+
+            homework:
+                document.getElementById("homework").value || null,
+
+            next_lesson_plan:
+                document.getElementById("next_lesson_plan").value || null,
+
+            comment:
+                document.getElementById("comment").value || null
+        };
+
+        try {
+
+            const response = await fetch(
+                "/lesson-reports/report_edit/{{ report.id }}",
+                {
+                    method: "PATCH",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(data)
+                }
+            );
+
+            if (!response.ok) {
+
+                const error = await response.json();
+
+                throw new Error(
+                    error.detail || "Не удалось обновить отчёт"
+                );
+            }
+
+            message.textContent = "Изменения сохранены";
+
+            setTimeout(() => {
+
+                window.location.href =
+                    "/lesson-reports/report_detail/{{ report.id }}";
+
+            }, 500);
+
+        } catch (error) {
+
+            message.textContent = error.message;
+
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

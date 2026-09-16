@@ -101,3 +101,12 @@ async def get_student(student_id: int, session: db):
     if not student:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return student
+
+@router.delete('/{student_id}/reports')
+async def delete_student(student_id: int, session: db):
+    student = await session.get(Students, student_id)
+    if not student:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    await session.delete(student)
+    await session.commit()
+    return

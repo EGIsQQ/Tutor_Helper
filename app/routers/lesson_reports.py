@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.backend.db_depends import get_db
 from app.models.lessons_reports import LessonReport
 from app.models.student import Students
-from app.schemas import CreateLessonReport
+from app.schemas import CreateLessonReport, UpdateLessonReport
 from sqlalchemy.orm import selectinload
 
 
@@ -163,4 +163,64 @@ async def get_report_detail(request: Request, report_id: int, session: db):
         context={
             "report": report,
         }
+    )
+
+
+@router.patch("/report_edit/{report_id}")
+async def update_lesson_report(
+    report_id: int,
+    report_data: UpdateLessonReport,
+    session: db,
+):
+    result = await session.execute(
+        select(LessonReport).where(LessonReport.id == report_id)
+    )
+    report = result.scalars().first()
+
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Отчёт не найден",
+        )
+
+    update_data = report_data.model_dump(
+        exclude_unset=True
+    )
+
+    for field, value in update_data.items():
+        if field == "lesson_date" and value is not None:
+            value = value.replace(tzinfo=None)
+            
+        setattr(report, field, value)
+
+    await session.commit()
+    await session.refresh(report)
+
+    return report
+
+@router.get("/report_edit/{report_id}")
+async def edit_lesson_report(
+    request: Request,
+    report_id: int,
+    session: db,
+):
+    result = await session.execute(
+        select(LessonReport)
+        .where(LessonReport.id == report_id)
+    )
+
+    report = result.scalars().first()
+
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Отчёт не найден",
+        )
+
+    return templates.TemplateResponse(
+        name="edit_report.html",
+        request=request,
+        context={
+            "report": report,
+        },
     )

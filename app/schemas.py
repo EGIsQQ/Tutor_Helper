@@ -17,3 +17,12 @@ class CreateLessonReport(BaseModel):
     homework: str | None = None
     next_lesson_plan: str | None = None
     comment: str | None = None
+
+class UpdateLessonReport(BaseModel):
+    topic: str | None = None
+    lesson_date: datetime | None = None
+    progress: str | None = None
+    difficulties: str | None = None
+    homework: str | None = None
+    next_lesson_plan: str | None = None
+    comment: str | None = None

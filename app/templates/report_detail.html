@@ -6,11 +6,11 @@
     <title>Отчёт по занятию — Tutor Helper</title>
     <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
     <style>
-        /* Внутренний отступ специально для карточки детального просмотра */
+       
         .report-detail-card {
             padding: 32px;
         }
-        /* Дополнительное выделение блока комментариев */
+       
         .report-comment-box {
             margin-top: 24px;
             padding: 16px;
@@ -21,13 +21,13 @@
     </style>
 </head>
 <body>
-    <!-- Используем ограничение ширины страницы отчетов из вашего CSS -->
+    
     <main class="container reports-page">
         
-        <!-- Ссылка ведет назад на историю отчетов конкретного ученика -->
-        <a class="back-link" href="/students/{{ report.student_id }}/reports">← К истории занятий</a>
+       
+        <a class="back-link" href="/">← На главную</a>
 
-        <!-- Шапка страницы в вашем стиле -->
+       
         <header class="header">
             <div>
                 <p class="eyebrow">Отчёт по уроку</p>
@@ -39,7 +39,7 @@
 
             <div class="actions">
                 <!-- Ссылка на будущее редактирование этого отчета -->
-                <a class="button button-secondary" href="/lesson-reports/{{ report.id }}/edit">Редактировать</a>
+                <a class="button button-secondary" href="/lesson-reports/report_edit/{{ report.id }}">Редактировать</a>
             </div>
         </header>
 
