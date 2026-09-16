@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчёты ученика — Tutor Helper</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <main class="container reports-page">
+        <a class="back-link" href="/">← Все ученики</a>
+
+        <header class="reports-header">
+            <div>
+                <p class="eyebrow">История занятий</p>
+                <h1>{{ student.full_name }}</h1>
+                <p class="subtitle">
+                    {{ student.subject or "Предмет не указан" }}
+                    · {{ student.level or "Уровень не указан" }}
+                </p>
+            </div>
+
+            <a class="button" href="/lesson-reports/add">Добавить отчёт</a>
+        </header>
+
+        {% if reports %}
+            <section class="report-list">
+                {% for report in reports %}
+                    <article class="report-card">
+                        <div class="report-top">
+                            <h2>{{ report.topic }}</h2>
+                            <time class="report-date">
+                                {{ report.lesson_date.strftime("%d.%m.%Y, %H:%M") }}
+                            </time>
+                        </div>
+
+                        {% if report.progress %}
+                            <div class="report-section">
+                                <h3>Что получилось</h3>
+                                <p>{{ report.progress }}</p>
+                            </div>
+                        {% endif %}
+
+                        {% if report.difficulties %}
+                            <div class="report-section">
+                                <h3>Сложности</h3>
+                                <p>{{ report.difficulties }}</p>
+                            </div>
+                        {% endif %}
+
+                        {% if report.homework %}
+                            <div class="report-section">
+                                <h3>Домашнее задание</h3>
+                                <p>{{ report.homework }}</p>
+                            </div>
+                        {% endif %}
+
+                        {% if report.next_lesson_plan %}
+                            <div class="report-section">
+                                <h3>Следующий урок</h3>
+                                <p>{{ report.next_lesson_plan }}</p>
+                            </div>
+                        {% endif %}
+
+                        {% if report.comment %}
+                            <div class="report-section">
+                                <h3>Комментарий</h3>
+                                <p>{{ report.comment }}</p>
+                            </div>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </section>
+        {% else %}
+            <section class="form-card empty-reports">
+                <h2>Отчётов пока нет</h2>
+                <p class="subtitle">Добавь первый отчёт после занятия с этим учеником.</p>
+                <a class="button" href="/lesson-reports/add">Добавить отчёт</a>
+            </section>
+        {% endif %}
+    </main>
+</body>
+</html>

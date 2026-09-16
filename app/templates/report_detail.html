@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчёт по занятию — Tutor Helper</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+    <style>
+        /* Внутренний отступ специально для карточки детального просмотра */
+        .report-detail-card {
+            padding: 32px;
+        }
+        /* Дополнительное выделение блока комментариев */
+        .report-comment-box {
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border-left: 4px solid #6366f1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Используем ограничение ширины страницы отчетов из вашего CSS -->
+    <main class="container reports-page">
+        
+        <!-- Ссылка ведет назад на историю отчетов конкретного ученика -->
+        <a class="back-link" href="/students/{{ report.student_id }}/reports">← К истории занятий</a>
+
+        <!-- Шапка страницы в вашем стиле -->
+        <header class="header">
+            <div>
+                <p class="eyebrow">Отчёт по уроку</p>
+                <h1>{{ report.topic }}</h1>
+                <p class="subtitle">
+                    Дата занятия: <time>{{ report.lesson_date.strftime("%d.%m.%Y в %H:%M") if report.lesson_date else "Дата не указана" }}</time>
+                </p>
+            </div>
+
+            <div class="actions">
+                <!-- Ссылка на будущее редактирование этого отчета -->
+                <a class="button button-secondary" href="/lesson-reports/{{ report.id }}/edit">Редактировать</a>
+            </div>
+        </header>
+
+        <!-- Содержимое отчета оборачиваем в ваш класс .card -->
+        <section class="card report-detail-card">
+            
+            {% if report.progress %}
+                <article class="report-section">
+                    <h3>Что получилось</h3>
+                    <p>{{ report.progress }}</p>
+                </article>
+            {% endif %}
+
+            {% if report.difficulties %}
+                <article class="report-section">
+                    <h3>Сложности</h3>
+                    <p>{{ report.difficulties }}</p>
+                </article>
+            {% endif %}
+
+            {% if report.homework %}
+                <article class="report-section">
+                    <h3>Домашнее задание</h3>
+                    <p>{{ report.homework }}</p>
+                </article>
+            {% endif %}
+
+            {% if report.next_lesson_plan %}
+                <article class="report-section">
+                    <h3>План на следующий урок</h3>
+                    <p>{{ report.next_lesson_plan }}</p>
+                </article>
+            {% endif %}
+
+            {% if report.comment %}
+                <article class="report-section report-comment-box">
+                    <h3>Заметки / Комментарий</h3>
+                    <p>{{ report.comment }}</p>
+                </article>
+            {% endif %}
+
+        </section>
+    </main>
+</body>
+</html>

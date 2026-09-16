@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor Helper</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div>
+                <p class="eyebrow">Личный кабинет</p>
+                <h1>Tutor Helper</h1>
+                <p class="subtitle">Ученики и отчёты по урокам</p>
+            </div>
+
+            <div class="actions">
+                <a class="button button-secondary" href="/docs">Открыть API</a>
+                <a class="button" href="/students/add">Добавить ученика</a>
+                <a class="button" href="/lesson-reports/add">Добавить отчёт</a>
+            </div>
+        </header>
+
+        <main class="grid">
+            <section class="card">
+                <div class="card-header">
+                    <h2>Ученики</h2>
+                    <span class="counter">{{ students | length }}</span>
+                </div>
+
+                <ul class="list">
+                    {% for student in students %}
+                        <li class="list-item">
+                            <div>
+                                <a class="student-link" href="/students/{{ student.id }}/reports">
+                                    {{ student.full_name }}
+                                </a>
+                                <p>
+                                    {{ student.subject or "Предмет не указан" }}
+                                    · {{ student.level or "Уровень не указан" }}
+                                </p>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li class="empty">Учеников пока нет.</li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <h2>Последние отчёты</h2>
+                    <span class="counter">{{ reports | length }}</span>
+                </div>
+
+                <ul class="list">
+                    {% for report in reports %}
+                        <li class="list-item">
+                            <div>
+                                <p class="subtitle" style="font-size: 13px; margin-bottom: 4px;">
+                                    {{ report.student.full_name }}
+                                </p>
+                                <!-- Кликабельная ссылка на детальную страницу отчёта -->
+                                <a class="student-link" href="/lesson-reports/report_detail/{{ report.id }}">
+                                    {{ report.topic }}
+                                </a>
+                            </div>
+
+                            <time>
+                                {{ report.lesson_date.strftime("%d.%m.%Y") }}
+                            </time>
+                        </li>
+                    {% else %}
+                        <li class="empty">Отчётов пока нет.</li>
+                    {% endfor %}
+                </ul>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

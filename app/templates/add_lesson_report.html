@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новый отчёт — Tutor Helper</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <main class="container form-page">
+        <a class="back-link" href="/">← На главную</a>
+
+        <section class="form-card">
+            <p class="eyebrow">Отчёт по уроку</p>
+            <h1>Добавить отчёт</h1>
+            <p class="subtitle">Сохрани короткий итог урока, чтобы видеть историю работы с учеником.</p>
+
+            {% if students %}
+                <form action="/lesson-reports/add" method="post" class="report-form">
+                    <div class="form-grid">
+                        <label>
+                            Ученик <span class="required">*</span>
+                            <select name="student_id" required>
+                                <option value="" selected disabled>Выберите ученика</option>
+                                {% for student in students %}
+                                    <option value="{{ student.id }}">
+                                        {{ student.full_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+
+                        <label>
+                            Дата и время урока
+                            <input type="datetime-local" name="lesson_date">
+                        </label>
+                    </div>
+
+                    <label>
+                        Тема урока <span class="required">*</span>
+                        <input
+                            type="text"
+                            name="topic"
+                            required
+                            placeholder="Например, линейные уравнения"
+                        >
+                    </label>
+
+                    <label>
+                        Что получилось
+                        <textarea name="progress" placeholder="Какие навыки ученик освоил на уроке?"></textarea>
+                    </label>
+
+                    <label>
+                        Сложности
+                        <textarea name="difficulties" placeholder="На что стоит обратить внимание в следующий раз?"></textarea>
+                    </label>
+
+                    <label>
+                        Домашнее задание
+                        <textarea name="homework" placeholder="Что нужно сделать до следующего урока?"></textarea>
+                    </label>
+
+                    <label>
+                        План следующего урока
+                        <textarea name="next_lesson_plan" placeholder="Что будете проходить дальше?"></textarea>
+                    </label>
+
+                    <label>
+                        Дополнительный комментарий
+                        <textarea name="comment" placeholder="Необязательная заметка"></textarea>
+                    </label>
+
+                    <div class="form-actions">
+                        <a class="button button-secondary" href="/">Отмена</a>
+                        <button class="button" type="submit">Сохранить отчёт</button>
+                    </div>
+                </form>
+            {% else %}
+                <p class="empty">Сначала добавь хотя бы одного ученика.</p>
+                <a class="button" href="/students/add">Добавить ученика</a>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
