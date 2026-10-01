@@ -37,6 +37,29 @@ class CreateLessonReport(BaseModel):
     next_lesson_plan: str | None = None
     comment: str | None = None
 
+    @classmethod
+    def as_form(cls,
+                student_id: int = Form(),
+                topic: str = Form(),
+                lesson_date: datetime | None = Form(default=None),
+                progress: str | None = Form(default=None),
+                difficulties: str | None = Form(default=None),
+                homework: str | None = Form(default=None),
+                next_lesson_plan: str | None = Form(default=None),
+                comment: str | None = Form(default=None),
+                ):
+        
+        return cls(
+            student_id=student_id,
+            topic=topic,
+            lesson_date=lesson_date,
+            progress=progress,
+            difficulties=difficulties,
+            homework=homework,
+            next_lesson_plan=next_lesson_plan,
+            comment=comment,
+        )
+
 class UpdateLessonReport(BaseModel):
     topic: str | None = None
     lesson_date: datetime | None = None
@@ -45,3 +68,6 @@ class UpdateLessonReport(BaseModel):
     homework: str | None = None
     next_lesson_plan: str | None = None
     comment: str | None = None
+
+    
+        

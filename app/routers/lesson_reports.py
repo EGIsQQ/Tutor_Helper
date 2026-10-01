@@ -1,18 +1,20 @@
 from typing import Annotated
 
-from datetime import datetime
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.backend.db_depends import get_db
 from app.models.lessons_reports import LessonReport
-from app.models.student import Students
-from app.schemas import CreateLessonReport, UpdateLessonReport
-from sqlalchemy.orm import selectinload
+from app.schemas.schemas import CreateLessonReport, UpdateLessonReport
+
+
+from app.dependencies.lessons import get_lesson_service
+from app.services.lessons import LessonReportService
+from app.dependencies.student import get_student_service
+from app.services.student import StudentService
 
 
 router = APIRouter(
@@ -27,12 +29,9 @@ templates = Jinja2Templates(directory="app/templates")
 @router.get("/add", response_class=HTMLResponse)
 async def add_lesson_report_page(
     request: Request,
-    session: db,
+    student_service: Annotated[StudentService, Depends(get_student_service)],
 ):
-    result = await session.execute(
-        select(Students).order_by(Students.full_name)
-    )
-    students = result.scalars().all()
+    students = await student_service.get_all_students()
 
     return templates.TemplateResponse(
         request=request,
@@ -43,119 +42,23 @@ async def add_lesson_report_page(
 
 @router.post("/add")
 async def create_lesson_report_from_form(
-    session: db,
-    student_id: Annotated[int, Form()],
-    topic: Annotated[str, Form(min_length=1)],
-    lesson_date: Annotated[datetime | None, Form()] = None,
-    progress: Annotated[str | None, Form()] = None,
-    difficulties: Annotated[str | None, Form()] = None,
-    homework: Annotated[str | None, Form()] = None,
-    next_lesson_plan: Annotated[str | None, Form()] = None,
-    comment: Annotated[str | None, Form()] = None,
+    lesson_service: Annotated[LessonReportService, Depends(get_lesson_service)],
+    lesson_report: Annotated[CreateLessonReport, Depends(CreateLessonReport.as_form)]
 ):
-    student = await session.get(Students, student_id)
-
-    if not student:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Ученик не найден",
-        )
-
-    report_data = {
-        "student_id": student_id,
-        "topic": topic.strip(),
-        "progress": progress or None,
-        "difficulties": difficulties or None,
-        "homework": homework or None,
-        "next_lesson_plan": next_lesson_plan or None,
-        "comment": comment or None,
-    }
-
-    if lesson_date is not None:
-        report_data["lesson_date"] = lesson_date
-
-    new_report = LessonReport(**report_data)
-    session.add(new_report)
-    await session.commit()
+    
+    report_data = LessonReport(**lesson_report.model_dump())
+    await lesson_service.create_report(report_data)
 
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_lesson_report(
-    report: CreateLessonReport,
-    session: db,
-):
-    student = await session.get(Students, report.student_id)
-
-    if not student:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Ученик не найден",
-        )
-
-    new_report = LessonReport(
-        **report.model_dump(exclude_none=True)
-    )
-
-    session.add(new_report)
-    await session.commit()
-    await session.refresh(new_report)
-
-    return new_report
-
-
-@router.get("/")
-async def get_all_lesson_reports(session: db):
-    result = await session.execute(
-        select(LessonReport).order_by(
-            LessonReport.lesson_date.desc()
-        )
-    )
-    return result.scalars().all()
-
-
-@router.get("/{student_id}")
-async def get_reports_by_student(
-    request: Request,
-    student_id: int,
-    session: db,
-):
-    student = await session.get(Students, student_id)
-
-    if not student:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Ученик не найден",
-        )
-
-    result = await session.execute(
-        select(LessonReport)
-        .where(LessonReport.student_id == student_id)
-        .order_by(LessonReport.lesson_date.desc())
-    )
-
-    return templates.TemplateResponse(
-        name="student_reports.html",
-        request=request, 
-        context={"student":student, "reports": result.scalars().all()},
-    )
-
 
 
 @router.get("/report_detail/{report_id}", response_class=HTMLResponse)
-async def get_report_detail(request: Request, report_id: int, session: db):
+async def get_report_detail(request: Request, report_id: int, lesson_service: Annotated[LessonReportService, Depends(get_lesson_service)]):
 
-    result = await session.execute(
-        select(LessonReport)
-        .options(selectinload(LessonReport.student))
-        .where(LessonReport.id == report_id))
-    report = result.scalars().first()
-    
-    
-    if not report:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Отчёт не найден")
-        
+    report = await lesson_service.get_report_by_id(report_id)
+          
    
     return templates.TemplateResponse(
         request=request,
@@ -170,52 +73,18 @@ async def get_report_detail(request: Request, report_id: int, session: db):
 async def update_lesson_report(
     report_id: int,
     report_data: UpdateLessonReport,
-    session: db,
+    lesson_service: Annotated[LessonReportService, Depends(get_lesson_service)],
 ):
-    result = await session.execute(
-        select(LessonReport).where(LessonReport.id == report_id)
-    )
-    report = result.scalars().first()
-
-    if not report:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Отчёт не найден",
-        )
-
-    update_data = report_data.model_dump(
-        exclude_unset=True
-    )
-
-    for field, value in update_data.items():
-        if field == "lesson_date" and value is not None:
-            value = value.replace(tzinfo=None)
-            
-        setattr(report, field, value)
-
-    await session.commit()
-    await session.refresh(report)
-
-    return report
+    
+    return await lesson_service.update_report(report_id, report_data)
 
 @router.get("/report_edit/{report_id}")
 async def edit_lesson_report(
     request: Request,
     report_id: int,
-    session: db,
+    lesson_service: Annotated[LessonReportService, Depends(get_lesson_service)],
 ):
-    result = await session.execute(
-        select(LessonReport)
-        .where(LessonReport.id == report_id)
-    )
-
-    report = result.scalars().first()
-
-    if not report:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Отчёт не найден",
-        )
+    report = await lesson_service.get_report_by_id(report_id)
 
     return templates.TemplateResponse(
         name="edit_report.html",

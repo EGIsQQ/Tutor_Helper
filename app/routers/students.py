@@ -1,15 +1,17 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.backend.db_depends import get_db
-from app.models.lessons_reports import LessonReport
-from app.models.student import Students
-from app.schemas import CreateStudent
+from app.schemas.schemas import CreateStudent
+
+from app.services.student import StudentService
+from app.services.lessons import LessonReportService
+from app.dependencies.lessons import get_lesson_service
+from app.dependencies.student import get_student_service
 
 router = APIRouter(
     prefix="/students",
@@ -30,16 +32,11 @@ async def add_student_page(request: Request):
 
 @router.post("/add")
 async def create_student_from_form(
-    session: db,
+    student_service: Annotated[StudentService, Depends(get_student_service)],
     student_data: Annotated[CreateStudent, Depends(CreateStudent.as_form)]
 ):
-    
-    new_student = Students(
-        **student_data.model_dump()
-    )
 
-    session.add(new_student)
-    await session.commit()
+    await student_service.create_student(student_data)
 
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -50,22 +47,12 @@ async def create_student_from_form(
 async def student_reports_page(
     student_id: int,
     request: Request,
-    session: db,
+    lesson_service: Annotated[LessonReportService, Depends(get_lesson_service)],
+    student_service: Annotated[StudentService, Depends(get_student_service)]
 ):
-    student = await session.get(Students, student_id)
-
-    if not student:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Ученик не найден",
-        )
-
-    result = await session.execute(
-        select(LessonReport)
-        .where(LessonReport.student_id == student_id)
-        .order_by(LessonReport.lesson_date.desc())
-    )
-    reports = result.scalars().all()
+    
+    reports = await lesson_service.get_lesson_reports_by_student_id(student_id)
+    student = await student_service.get_student_by_id(student_id)
 
     return templates.TemplateResponse(
         request=request,
@@ -80,10 +67,6 @@ async def student_reports_page(
 
 
 @router.delete('/{student_id}/reports')
-async def delete_student(student_id: int, session: db):
-    student = await session.get(Students, student_id)
-    if not student:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    await session.delete(student)
-    await session.commit()
+async def delete_student(student_id: int, student_service: Annotated[StudentService, Depends(get_student_service)]):
+    await student_service.delete_student(student_id)
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
