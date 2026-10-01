@@ -69,5 +69,28 @@ class UpdateLessonReport(BaseModel):
     next_lesson_plan: str | None = None
     comment: str | None = None
 
-    
+
+class CreateUser(BaseModel):
+    full_name: str
+    email: str
+    password: str
+    role: str
+
+    @classmethod
+    def as_form(
+        cls,
+        full_name: str = Form(),
+        email: str = Form(),
+        password: str = Form(),
+        role: str = Form(),
+        
+    ):
+        return cls(
+            full_name=full_name,
+            email=email,
+            password=password,
+            role=role,
+            
+        )
+        
         

@@ -12,7 +12,7 @@ from sqlalchemy.orm import selectinload
 from app.backend.db import async_session_maker
 from app.models.lessons_reports import LessonReport
 from app.models.student import Students
-from app.routers import lesson_reports, students
+from app.routers import lesson_reports, students, auth
 from app.backend.db_depends import get_db
 
 
@@ -52,3 +52,4 @@ async def root(request: Request, session: db):
 
 app.include_router(students.router)
 app.include_router(lesson_reports.router)
+app.include_router(auth.router)

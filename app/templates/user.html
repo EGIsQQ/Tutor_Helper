@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Профиль — Tutor Helper</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='style.css') }}"
+    >
+</head>
+
+<body>
+
+<main class="container">
+
+    <a href="/" class="back-link">
+        ← На главную
+    </a>
+
+    <div class="form-card">
+
+        <p class="eyebrow">Tutor Helper</p>
+
+        <h1>Профиль пользователя</h1>
+
+        <div class="report-section">
+
+            <h3>Имя</h3>
+            <p>{{ user.full_name }}</p>
+
+        </div>
+
+        <div class="report-section">
+
+            <h3>Email</h3>
+            <p>{{ user.email }}</p>
+
+        </div>
+
+        <div class="report-section">
+
+            <h3>Роль</h3>
+            <p>
+                {% if user.role == "teacher" %}
+                    Учитель
+                {% elif user.role == "parent" %}
+                    Родитель
+                {% else %}
+                    {{ user.role }}
+                {% endif %}
+            </p>
+
+        </div>
+
+        {% if user.student %}
+        <div class="report-section">
+
+            <h3>Ученик</h3>
+            <p>{{ user.student.full_name }}</p>
+
+        </div>
+        {% endif %}
+
+        <div class="form-actions">
+
+            <a href="/" class="button">
+                На главную
+            </a>
+
+        </div>
+
+    </div>
+
+</main>
+
+</body>
+</html>

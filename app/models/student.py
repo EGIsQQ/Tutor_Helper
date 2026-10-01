@@ -1,5 +1,5 @@
 from app.backend.db import Base
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
 
@@ -18,4 +18,9 @@ class Students(Base):
     "LessonReport",
     back_populates="student",
     cascade="all, delete-orphan",
-)
+    )
+
+    user = relationship(
+        "User",
+        back_populates="student",
+    )

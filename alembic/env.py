@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from app.backend.db import Base
 import app.models.student
 import app.models.lessons_reports
+import app.models.users
 
 
 config = context.config
