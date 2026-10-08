@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tutor Helper</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='style.css') }}"
+    >
+</head>
+
+<body>
+
+<main class="container form-page">
+
+    <div class="form-card">
+
+        <p class="eyebrow">Tutor Helper</p>
+
+        <h1>Добро пожаловать</h1>
+
+        <p class="subtitle">
+            Дневник репетитора для удобной работы с учениками.
+        </p>
+
+        <div class="form-actions">
+            <a href="/auth/" class="button">
+                Регистрация
+            </a>
+
+            <a href="/auth/login" class="button">
+                Войти
+            </a>
+        </div>
+
+    </div>
+
+</main>
+
+</body>
+</html>

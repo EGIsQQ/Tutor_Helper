@@ -74,7 +74,7 @@ class CreateUser(BaseModel):
     full_name: str
     email: str
     password: str
-    role: str
+    # role: str
 
     @classmethod
     def as_form(
@@ -82,14 +82,14 @@ class CreateUser(BaseModel):
         full_name: str = Form(),
         email: str = Form(),
         password: str = Form(),
-        role: str = Form(),
+        # role: str = Form(),
         
     ):
         return cls(
             full_name=full_name,
             email=email,
             password=password,
-            role=role,
+            # role=role,
             
         )
         

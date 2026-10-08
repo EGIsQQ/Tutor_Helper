@@ -2,7 +2,7 @@ from typing import Annotated
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -12,8 +12,10 @@ from sqlalchemy.orm import selectinload
 from app.backend.db import async_session_maker
 from app.models.lessons_reports import LessonReport
 from app.models.student import Students
+from app.models.users import User
 from app.routers import lesson_reports, students, auth
 from app.backend.db_depends import get_db
+from app.dependencies.get_user import get_current_user
 
 
 app = FastAPI()
@@ -23,9 +25,19 @@ templates = Jinja2Templates(directory="app/templates")
 
 db = Annotated[AsyncSession, Depends(get_db)]
 
+@app.get("/")
+async def registrtation_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="start_page.html",
+    )
 
-@app.get("/", response_class=HTMLResponse)
-async def root(request: Request, session: db):
+
+@app.get("/admin")
+async def root(request: Request, session: db, user: Annotated[User, Depends(get_current_user)]):
+    if user.role != "teacher":
+        return HTTPException(status_code=403, detail="Access denied")
+    
     students_result = await session.execute(
         select(Students).order_by(Students.full_name)
     )

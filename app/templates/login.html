@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Регистрация — Tutor Helper</title>
+    <title>Вход — Tutor Helper</title>
 
     <link
         rel="stylesheet"
@@ -20,33 +20,23 @@
 
         <p class="eyebrow">Tutor Helper</p>
 
-        <h1>Регистрация</h1>
+        <h1>Вход</h1>
 
         <p class="subtitle">
-            Создайте аккаунт для работы с дневником репетитора.
+            Войдите в свой аккаунт для продолжения работы.
         </p>
 
         <form
             method="post"
-            action="/auth"
+            action="/auth/login/"
             class="report-form"
         >
-
-            <label>
-                Имя
-                <input
-                    type="text"
-                    name="full_name"
-                    placeholder="Введите имя"
-                    required
-                >
-            </label>
 
             <label>
                 Email
                 <input
                     type="email"
-                    name="email"
+                    name="username"
                     placeholder="Введите email"
                     required
                 >
@@ -62,27 +52,22 @@
                 >
             </label>
 
-            <!-- <label>
-                Роль
-                <select name="role" required>
-                    <option value="">Выберите роль</option>
-                    <option value="teacher">Учитель</option>
-                    <option value="parent">Родитель</option>
-                </select>
-            </label> -->
-
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+            
             <button
                 type="submit"
                 class="button"
             >
-                Зарегистрироваться
+                Войти
             </button>
 
         </form>
 
         <p class="subtitle">
-            Уже есть аккаунт?
-            <a href="/auth/login">Войти</a>
+            Нет аккаунта?
+            <a href="/auth/">Зарегистрироваться</a>
         </p>
 
     </div>

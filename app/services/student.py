@@ -1,4 +1,4 @@
-from app.models.student import Students 
+from app.models.student import Students
 from fastapi import HTTPException, status
 
 class StudentService:
@@ -7,7 +7,8 @@ class StudentService:
 
     async def create_student(self, student_data):
         new_student = Students(**student_data.model_dump())
-        return await self.repository.create(new_student)
+        student = await self.repository.create(new_student)
+        return student
 
     async def get_student_by_id(self, student_id):
         student = await self.repository.get_by_id(student_id)

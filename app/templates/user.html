@@ -16,10 +16,11 @@
 <body>
 
 <main class="container">
-
-    <a href="/" class="back-link">
+{% if user.role == "teacher" %}
+    <a href="/admin" class="back-link">
         ← На главную
     </a>
+{% endif %}
 
     <div class="form-card">
 
@@ -44,19 +45,11 @@
         <div class="report-section">
 
             <h3>Роль</h3>
-            <p>
-                {% if user.role == "teacher" %}
-                    Учитель
-                {% elif user.role == "parent" %}
-                    Родитель
-                {% else %}
-                    {{ user.role }}
-                {% endif %}
-            </p>
+            <p>{% if user.role == "teacher" %}Учитель{% elif user.role == "parent" %}Родитель{% else %}{{ user.role }}{% endif %}</p>
 
         </div>
 
-        {% if user.student %}
+        {% if user.student_id %}
         <div class="report-section">
 
             <h3>Ученик</h3>
@@ -66,10 +59,18 @@
         {% endif %}
 
         <div class="form-actions">
-
-            <a href="/" class="button">
+            {% if user.role == "teacher" %}
+            <a href="/admin" class="button">
                 На главную
             </a>
+            {% elif user.role == "parent" %}
+            <a href="/students/add" class="button">
+                Добавить ученика
+            </a>
+            <a href="/lesson-reports/all_reports" class="button">
+                Отчеты по ученику
+            </a>
+            {% endif %}
 
         </div>
 
